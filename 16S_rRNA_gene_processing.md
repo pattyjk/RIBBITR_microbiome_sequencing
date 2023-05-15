@@ -26,30 +26,27 @@ qiime quality-filter q-score \
   qiime deblur denoise-16S \
   --i-demultiplexed-seqs ribbitr_demux-filtered.qza \
   --p-trim-length 120 \
-  --o-representative-sequences lab_spore_rep-seqs-deblur.qza \
-  --o-table lab_spore_table-deblur.qza \
+  --o-representative-sequences ribbitr_rep-seqs-deblur.qza \
+  --o-table ribbitr_table-deblur.qza \
   --p-sample-stats \
-  --o-stats lab_spore_deblur-stats.qza
+  --o-stats ribbitr_deblur-stats.qza
  
  #make phylogenetic tree with fasttree
  qiime phylogeny align-to-tree-mafft-fasttree \
-  --i-sequences lab_spore_rep-seqs-deblur.qza \
+  --i-sequences ribbitr_rep-seqs-deblur.qza \
   --output-dir phylogeny-align-to-tree-mafft-fasttree
-  
-  #export tree as NWK format
-  qiime tools export --input-path tree.qza --output-path tree
- 
-#pull trained taxonomy dataset (SILVA 138. Has only 515F/806R region)
-wget https://data.qiime2.org/2022.8/common/silva-138-99-515-806-nb-classifier.qza
- 
-#assign taxonomy to  SILVA with sklearn
-qiime feature-classifier classify-sklearn   --i-classifier silva-138-99-515-806-nb-classifier.qza   --i-reads  lab_spore_rep-seqs-deblur.qza   --o-classification lab_spore_taxonomy.qza
 
+#assign taxonomy to  SILVA with sklearn
+qiime feature-classifier classify-sklearn   --i-classifier silva-138-99-515-806-nb-classifier.qza   --i-reads  ribbitr_rep-seqs-deblur.qza   --o-classification ribbitr_taxonomy.qza
 
 qiime metadata tabulate \
-  --m-input-file taxonomy.qza \
+  --m-input-file ribbitr_taxonomy.qza \
   --o-visualization taxonomy.qzv
  
 # convert ASV table to biom/text
+ qiime tools export --input-path ribbitr_table-deblur.qza --output-path asv_table
+ biom convert -i asv_table/feature-table.biom -o asv_table.txt --to-tsv
  
+ #export taxonomy file
+ qiime tools export --input-path taxonomy.qzv --output-path taxonomy
  ```
